@@ -13,7 +13,7 @@ Also, add the callback URL to the settings section of your Auth0 client.
 Register `http://localhost:3000/callback` as `Allowed Callback URLs` and `http://localhost:3000`
 as `Allowed Logout URLs` in your client settings.
 
-Run `pip install -r requirements.txt` to install the dependencies and run `python server.py`.
+Run `pip install -r requirements/base.txt` to install the dependencies and run `python server.py`.
 The app will be served at [http://localhost:3000/](http://localhost:3000/).
 
 # Running the App with Docker
