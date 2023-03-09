@@ -42,8 +42,7 @@ app.add_middleware(
 async def homepage(request: Request):
     token = request.session.get('token')
     if token:
-        message = {'message': f'Hello! Your token is: {json.dumps(token)}'}
-        return JSONResponse(content=message, status_code=HTTPStatus.OK)
+        return JSONResponse(content=json.dumps(token), status_code=HTTPStatus.OK)
     else:
         return RedirectResponse(url='/login', status_code=HTTPStatus.SEE_OTHER)
     
