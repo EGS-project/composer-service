@@ -12,20 +12,20 @@ import config
 auth_router = APIRouter()
 
 
-@auth_router.get('/auth')
+@auth_router.get('/api/v1/auth')
 async def auth(request : Request, auth_client : StarletteOAuth2App = Depends(Auth0.client)):
     token = await auth_client.authorize_access_token(request)
     request.session['token'] = token
     return RedirectResponse(url='/', status_code=HTTPStatus.FOUND)
 
 
-@auth_router.get('/login')
+@auth_router.get('/api/v1/login')
 async def login(request : Request, auth_client : StarletteOAuth2App = Depends(Auth0.client)):
     redirect_uri = request.url_for('auth')
     return await auth_client.authorize_redirect(request, redirect_uri) # redirects to auth client login page
 
 
-@auth_router.get("/logout")
+@auth_router.get("/api/v1/logout")
 async def logout(request : Request):
     request.session.clear()
     return RedirectResponse(

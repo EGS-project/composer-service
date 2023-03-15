@@ -9,26 +9,17 @@ import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
+from docs.dependencies import custom_openapi
 from src.auth.router import auth_router
+from src.conversion.router import conversion_router
 
 import config
 
-app = FastAPI(
-    title="Converter Web App",
-    description='Converter Web App',
-    version="v1.0.0",
-    terms_of_service="https://en.wikipedia.org/wiki/Terms_of_service",
-    contact={
-        "name": "Our GitHub organization",
-        "url": "https://github.com/EGS-project"
-    },
-    license_info={
-        "name": "Beerware License",
-        "url": "https://en.wikipedia.org/wiki/Beerware",
-    },)
+app = FastAPI(openapi_url="/api/v1/openapi.yaml")
+app.openapi = custom_openapi
 
 app.add_middleware(
-    SessionMiddleware, 
+    SessionMiddleware,
     secret_key=config.APP_SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
@@ -38,15 +29,18 @@ app.add_middleware(
     allow_headers=["*"],
     )
 
+
 @app.get('/')
 async def homepage(request: Request):
     token = request.session.get('token')
     if token:
         return JSONResponse(content=json.dumps(token), status_code=HTTPStatus.OK)
     else:
-        return RedirectResponse(url='/login', status_code=HTTPStatus.SEE_OTHER)
+        return RedirectResponse(url='/api/v1/login', status_code=HTTPStatus.SEE_OTHER)
+  
     
 app.include_router(router=auth_router)
+app.include_router(router=conversion_router)
 
 if __name__ == '__main__':
     uvicorn.run(
