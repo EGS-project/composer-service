@@ -8,3 +8,4 @@ venv/
 __
 .vscode/
 src/template/*
+certs/
