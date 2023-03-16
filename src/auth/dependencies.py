@@ -3,7 +3,7 @@
 import src.config as config
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuth, StarletteOAuth2App
-
+from fastapi.security import APIKeyCookie
 
 class Auth0:
     AUTH0 = None
@@ -32,3 +32,4 @@ class Auth0:
         cls.AUTH0 = oauth.auth0
 
 
+api_key_cookie = APIKeyCookie(name=config.APP_COOKIE_NAME, auto_error=True)
