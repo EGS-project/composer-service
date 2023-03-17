@@ -10,3 +10,4 @@ httpx==0.23.3
 fastapi-sessions==0.3.2
 pyyaml==6.0
 python-jose==3.3.0
+openapi-schema-pydantic==1.2.4
