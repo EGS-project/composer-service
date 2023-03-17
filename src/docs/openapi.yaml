@@ -108,8 +108,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnprocessableEntity'
-  
-  
+  /api/v1/login:
+    get:
+      security:
+        - cookieAuth: []
+      summary: Get oauth login page
+      description: Get oauth login page
+      responses:
+        '302':
+          description: Found
+        '404':
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+  /api/v1/auth:
+    get:
+      security:
+        - cookieAuth: []
+      summary: Auth User
+      description: Auth User
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+  /api/v1/logout:
+    get:
+      security:
+        - cookieAuth: []
+      summary: Logout User
+      description: Logout User
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+                
   
 components:
   schemas:
@@ -244,4 +306,5 @@ components:
     cookieAuth:
       type: apiKey
       in: cookie
-      name: JSESSIONID  # cookie name
+      name: MY_SUPER_COOOKIE  # cookie name
+
