@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+
+  mysql:
+    image: mysql/mysql-server:8.0
+    container_name: mysql
+    cap_add:
+      - SYS_NICE
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DATABASE: super_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin
+    restart: on-failure
+    volumes:
+      - ./deployment/mysql/config.sql:/docker-entrypoint-initdb.d/data.sql

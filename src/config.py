@@ -1,11 +1,11 @@
 '''global config'''
 
+
 from typing import List
 from dotenv import find_dotenv, load_dotenv
 from os import environ as env
 
-ENV_FILE = find_dotenv()
-if ENV_FILE:
+if ENV_FILE := find_dotenv():
     load_dotenv(ENV_FILE)
 
 # AUTH0
@@ -31,3 +31,11 @@ BACKEND_CORS_ORIGINS = [
 
 # SSL
 SSL_KEYFILE_PASSPHRASE=env.get('SSL_KEYFILE_PASSPHRASE', 'nope:)')
+
+# MONGO
+DB_USER=env.get('DB_USER', 'admin')
+DB_PASSWORD=env.get('DB_PASSWORD', 'admin')
+DB_HOST=env.get('DB_HOST', 'localhost')
+DB_PORT=env.get('DB_PORT', 3306)
+DB_NAME=env.get('DB_NAME', 'super_db')
+DB_CONNECTION_URL=f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:3306/{DB_NAME}'
