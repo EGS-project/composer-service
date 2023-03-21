@@ -1,21 +1,20 @@
 '''dependencies.py - Dependency Injection for router.py'''
 
+from http import HTTPStatus
+from fastapi import HTTPException, Request
+from src.auth.factory import ResponseFactory
 import src.config as config
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuth, StarletteOAuth2App
+from starlette.responses import RedirectResponse
 from fastapi.security import APIKeyCookie
+from urllib.parse import quote_plus, urlencode
 
 class Auth0:
-    AUTH0 = None
+    def __init__(self) -> None:
+        self.client: StarletteOAuth2App = self.register_client()
     
-    @classmethod
-    def client(cls) -> StarletteOAuth2App:
-        if cls.AUTH0 == None:
-            cls.register()
-        return cls.AUTH0
-
-    @classmethod
-    def register(cls):
+    def register_client(self):
         oauth = OAuth()
         oauth.register(
             name='auth0',
@@ -29,7 +28,35 @@ class Auth0:
             },
             server_metadata_url=f'https://{config.AUTH0_DOMAIN}/.well-known/openid-configuration',
         )
-        cls.AUTH0 = oauth.auth0
+        return oauth.auth0
+
+    async def get_token(self, request) -> dict:
+        try:
+            return await self.client.authorize_access_token(request)
+        except Exception as e:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail="Unauthorized."
+            ) from e
+
+    async def authorize_redirect(self, request: Request, redirect_uri: str):
+        try:
+            return await self.client.authorize_redirect(request, redirect_uri)
+        except HTTPException as e:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Not found."
+            ) from e
+            
+    def logout_redirect(self, redirect_uri: str):
+        return RedirectResponse(
+            url=f"https://{config.AUTH0_DOMAIN}/v2/logout?" 
+            + urlencode(
+                {
+                    "returnTo": redirect_uri,
+                    "client_id": config.AUTH0_CLIENT_ID
+                },
+                quote_via=quote_plus,
+            )
+        )
 
 
 api_key_cookie = APIKeyCookie(name=config.APP_COOKIE_NAME, auto_error=True)

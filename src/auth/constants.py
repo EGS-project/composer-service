@@ -1,0 +1,3 @@
+
+GOOGLE = 'google'
+GITHUB = 'github'
