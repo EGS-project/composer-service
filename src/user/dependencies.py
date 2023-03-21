@@ -5,6 +5,10 @@ from src.auth.utils import decoded_value
 from http import HTTPStatus
 from fastapi import Depends, HTTPException
 from src.auth.dependencies import api_key_cookie
+from src.database.dependencies import db_engine
+import src.user.models as models
+
+models.Base.metadata.create_all(bind=db_engine)
 
 def current_user(cookie: str = Depends(api_key_cookie)):
     try:

@@ -1,11 +1,8 @@
 '''models.py for db models'''
 
-import json
-from sqlalchemy import ARRAY, JSON, Boolean, Column, ForeignKey, Integer, String, Text
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy import Boolean, Column, Integer, String, Text
 from sqlalchemy.orm import relationship
-
-from database.database import Base
+from database.dependencies import Base
 
 
 class User(Base):
