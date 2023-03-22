@@ -8,7 +8,6 @@ from src.user.dependencies import current_user
 from src.user.models import User
 from fastapi.encoders import jsonable_encoder
 import src.user.schemas as schemas
-import src.user.crud as crud
 from sqlalchemy.orm import Session
 
 
