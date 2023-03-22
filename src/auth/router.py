@@ -9,10 +9,10 @@ from src.auth.dependencies import Auth0
 from src.auth.utils import decoded_value, retrieve_auth_type
 from authlib.integrations.starlette_client import StarletteOAuth2App
 from src.auth.dependencies import api_key_cookie
-from src.auth.utils import build_session_data
 from sqlalchemy.orm import Session
 import src.user.models as models
-import src.user.crud as crud
+from src.user.manager import UserManager
+from src.user.dependencies import user_manager
 
 auth_router = APIRouter()
 
@@ -20,15 +20,11 @@ auth_router = APIRouter()
 async def auth(
     request: Request, 
     auth_client: Auth0 = Depends(Auth0), 
-    db: Session = Depends(database),
+    user_manager: UserManager = Depends(user_manager),
     response_factory: ResponseFactory = Depends(ResponseFactory)
     ):
     token: dict = await auth_client.get_token(request)
-    user: models.User = crud.get_or_create_user(
-        db=db, 
-        userinfo=token['userinfo'], 
-        auth_type=retrieve_auth_type(token['userinfo']['sub'])
-        )
+    user: models.User = user_manager.process_user_auth(userinfo=token['userinfo'])
     return response_factory.auth_response(user=user)
 
 

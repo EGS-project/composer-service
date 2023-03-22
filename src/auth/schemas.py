@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from typing import Optional
+from pydantic import BaseModel, EmailStr, validator
 
 class SessionData(BaseModel):
-    user_id: int
-    user_email: EmailStr
-    
+    user_id: Optional[int]
+    user_identification: Optional[str]
+    auth_type: Optional[str]
