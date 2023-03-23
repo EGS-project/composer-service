@@ -10,8 +10,9 @@ from docs.dependencies import custom_openapi
 from src.auth.router import auth_router
 from src.conversion.router import conversion_router
 from src.user.router import user_router
+from src.healthcheck.router import healthcheck_router
 import src.user.models as user_models
-import config
+import src.config as config
 
 
 app = FastAPI(openapi_url="/api/v1/openapi.yaml")
@@ -28,6 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
     )
 
+
 @app.on_event("startup")
 def startup_event():
     user_models.Base.metadata.create_all(bind=db_engine)
@@ -36,6 +38,7 @@ def startup_event():
 app.include_router(router=auth_router)
 app.include_router(router=conversion_router)
 app.include_router(router=user_router)
+app.include_router(router=healthcheck_router)
 
 if __name__ == '__main__':
     uvicorn.run(
