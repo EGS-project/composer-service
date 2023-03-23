@@ -1,22 +1,16 @@
+import src.user.models as models
+from src.auth.utils import retrieve_auth_type
+from src.user.factory import UserFactory
+from src.auth.constants import CLASSICO, GOOGLE, GITHUB
+
+from src.user.utils import build_user_create
+from src.user.repository import UserRepository
 
 '''
 use super_db;
 show tables;
 select * from users;
 '''
-
-from auth.utils import retrieve_auth_type
-from src.user.factory import UserFactory
-import json
-from sqlalchemy.orm import Session
-from src.auth.constants import CLASSICO, GOOGLE, GITHUB
-
-import src.user.models as models
-import src.user.schemas as schemas
-from src.user.constants import CONV_HISTORY_LIMIT
-from src.user.utils import build_user_create
-from src.user.repository import UserRepository
-
 
 class UserManager:
     def __init__(self, user_factory: UserFactory, user_repository: UserRepository) -> None:
