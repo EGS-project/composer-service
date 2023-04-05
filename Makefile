@@ -10,3 +10,9 @@ connect:
 
 access:
 	docker exec -it mysql /bin/bash
+	
+clean:
+	docker rmi -f $(shell docker images -aq)
+	docker rm -f $(shell docker ps -aq)
+	docker ps -a
+	docker images -a
