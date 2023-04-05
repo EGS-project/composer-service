@@ -1,7 +1,6 @@
 '''main.py is a root of the project, which inits the FastAPI app'''
 
-from http import HTTPStatus
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -36,9 +35,9 @@ def startup_event():
     
     
 app.include_router(router=auth_router)
-app.include_router(router=conversion_router)
 app.include_router(router=user_router)
 app.include_router(router=healthcheck_router)
+app.include_router(router=conversion_router)
 
 if __name__ == '__main__':
     uvicorn.run(
