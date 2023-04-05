@@ -9,3 +9,4 @@ __
 .vscode/
 src/template/*
 certs/
+.DS_Store
