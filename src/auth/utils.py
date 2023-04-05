@@ -13,13 +13,6 @@ def encoded_value(value):
 def decoded_value(value):
     return jwt.decode(value, config.APP_SECRET_KEY)
     
-def build_session_data(user: models.User) -> dict:
-    return SessionData(
-        user_id=user.id,
-        user_identification=user.email or user.nickname,
-        auth_type=user.auth_type,
-    ).__dict__
-    
 def retrieve_auth_type(sub: str) -> str:
     if GOOGLE.lower() in sub.lower():
         return GOOGLE.lower()

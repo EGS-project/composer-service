@@ -1,8 +1,9 @@
 '''dependencies.py - Dependency Injection for router.py'''
 
 from http import HTTPStatus
-from fastapi import HTTPException, Request
-from src.auth.factory import ResponseFactory
+from fastapi import Depends, HTTPException, Request
+from src.auth.schemas import SessionData
+from src.auth.utils import decoded_value
 import src.config as config
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuth, StarletteOAuth2App
@@ -60,3 +61,13 @@ class Auth0:
 
 
 api_key_cookie = APIKeyCookie(name=config.APP_COOKIE_NAME, auto_error=True)
+
+
+def session_data(cookie: str = Depends(api_key_cookie)) -> SessionData:
+    try:
+        return SessionData.parse_obj(decoded_value(cookie))
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Unprocessable entity.",
+        ) from e

@@ -2,7 +2,8 @@
 
 from http import HTTPStatus
 from fastapi import Request, Response
-from src.auth.utils import build_session_data, encoded_value
+from src.auth.schemas import SessionData
+from src.auth.utils import encoded_value
 import src.user.models as models
 
 import src.config as config
@@ -15,10 +16,10 @@ class ResponseFactory:
         response = Response(status_code=HTTPStatus.OK, content="Authorized.")
         response.set_cookie(
             key = config.APP_COOKIE_NAME,
-            value = encoded_value(build_session_data(user=user)),
+            value = encoded_value(SessionFactory.create_session(user=user)),
             domain = config.APP_HOST,
             path = '/',
-            samesite="none",
+            samesite="none",    
             secure=True)
         
         return response
@@ -33,3 +34,13 @@ class ResponseFactory:
             secure=True)
         
         return response
+
+class SessionFactory:
+
+    @classmethod
+    def create_session(cls, user: models.User) -> dict:
+        return SessionData(
+            user_id=user.id,
+            user_identification=user.email or user.nickname,
+            auth_type=user.auth_type,
+        ).__dict__
