@@ -1,18 +1,32 @@
 import stomp
+import stomp.utils
 import logging
+from src.activemq.cache.cache import ActivemqMessageCache
+from src.activemq.listener import ReplyListener
+
+from src.s3_connector.message import GetImageReplyMsg, StoreImageReplyMsg
 
 
-class GetImageReplyListener(stomp.ConnectionListener):
-    def __init__(self) -> None:
-        super().__init__()
+class GetImageReplyListener(ReplyListener):
+    def __init__(self, activemq_message_cache: ActivemqMessageCache) -> None:
+        ReplyListener.__init__(
+            self, 
+            activemq_message_cache=activemq_message_cache
+            )
         
-    def on_message(self, message):
-        logging.info(f'new get image reply message: {message}')
+    def on_message(self, frame: stomp.utils.Frame):
+        msg = GetImageReplyMsg()
+        msg.deserialize(frame=frame)
+        self.activemq_message_cache.push(msg=msg)
     
-class StoreImageReplyListener(stomp.ConnectionListener):
-    def __init__(self) -> None:
-        super().__init__()
+class StoreImageReplyListener(ReplyListener):
+    def __init__(self, activemq_message_cache: ActivemqMessageCache) -> None:
+        ReplyListener.__init__(
+            self, 
+            activemq_message_cache=activemq_message_cache
+            )
         
-    def on_message(self, message):
-        logging.info(f'new store image reply message: {message}')
-    
+    def on_message(self, frame: stomp.utils.Frame):
+        msg = StoreImageReplyMsg()
+        msg.deserialize(frame=frame)
+        self.activemq_message_cache.push(msg=msg)

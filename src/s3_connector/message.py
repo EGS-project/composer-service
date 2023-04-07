@@ -19,7 +19,14 @@ class StoreImageMsg(CachedMessage):
         self.image_data = image_data
             
     def serialize(self):
-        pass
+        mime_multipart = MIMEMultipart()
+        part = MIMEImage(self.image_data)
+        part.add_header('Content-ID', 'image_data')
+        mime_multipart.attach(part)
+        part = MIMEText(self.filename)
+        part.add_header('Content-ID', 'filename')
+        mime_multipart.attach(part)
+        return mime_multipart.as_string()  
     
     def deserialize(self, frame: stomp.utils.Frame):
         mime_message: MIMEMessage = email.message_from_string(frame.body)
@@ -27,15 +34,18 @@ class StoreImageMsg(CachedMessage):
             if part.get('Content-ID') == 'image_data':
                 self.image_data = part.get_payload(decode=True)
             elif part.get('Content-ID') == 'filename':
-                self.image_format = part.get_payload(decode=True)
+                self.image_format = part.get_payload(decode=False)
         self.correlation_id = frame.headers.get('correlation_id')
     
 class StoreImageReplyMsg(CachedMessage):
     def __init__(
         self,
-        correlation_id: str
+        correlation_id: str = None,
+        url: str = None
         ) -> None:
         CachedMessage.__init__(self, correlation_id=correlation_id)
+        self.url = url
+        self.correlation_id = correlation_id
     
     def serialize(self):
         mime_multipart = MIMEMultipart()
@@ -45,33 +55,85 @@ class StoreImageReplyMsg(CachedMessage):
         return mime_multipart.as_string()  
     
     def deserialize(self, frame: stomp.utils.Frame):
-        pass
+        mime_message: MIMEMessage = email.message_from_string(frame.body)
+        for part in mime_message.walk():
+            if part.get('Content-ID') == 'url':
+                self.url = part.get_payload(decode=False)
+        self.correlation_id = frame.headers.get('correlation_id')
+        
+    def __eq__(self, msg):
+        return isinstance(msg, StoreImageReplyMsg) \
+            and self.correlation_id == msg.correlation_id \
+                and self.url == msg.url
 
 class GetImageMsg(CachedMessage):
-    def __init__(self, correlation_id: str, filename: str) -> None:
+    def __init__(
+        self,
+        correlation_id: str = None,
+        filename: str = None
+        ) -> None:
         CachedMessage.__init__(self, correlation_id=correlation_id)
         self.filename = filename
             
     def serialize(self):
-        pass        
+        mime_multipart = MIMEMultipart()
+        part = MIMEText(self.filename)
+        part.add_header('Content-ID', 'filename')
+        mime_multipart.attach(part)
+        return mime_multipart.as_string() 
     
     def deserialize(self, frame: stomp.utils.Frame):
-        pass
+        mime_message: MIMEMessage = email.message_from_string(frame.body)
+        for part in mime_message.walk():
+            if part.get('Content-ID') == 'filename':
+                self.url = part.get_payload(decode=False)
+        self.correlation_id = frame.headers.get('correlation_id')
     
 class GetImageReplyMsg(CachedMessage):
-    def __init__(self, correlation_id: str, url: str) -> None:
+    def __init__(
+        self,
+        correlation_id: str = None,
+        url: str = None
+        ) -> None:
         CachedMessage.__init__(self, correlation_id=correlation_id)
         self.url = url
             
     def serialize(self):
-        pass        
+        mime_multipart = MIMEMultipart()
+        part = MIMEText(self.url)
+        part.add_header('Content-ID', 'url')
+        mime_multipart.attach(part)
+        return mime_multipart.as_string() 
     
     def deserialize(self, frame: stomp.utils.Frame):
-        pass
+        mime_message: MIMEMessage = email.message_from_string(frame.body)
+        for part in mime_message.walk():
+            if part.get('Content-ID') == 'url':
+                self.url = part.get_payload(decode=False)
+        self.correlation_id = frame.headers.get('correlation_id')
+    
+    def __eq__(self, msg):
+        return isinstance(msg, GetImageReplyMsg) \
+            and self.correlation_id == msg.correlation_id \
+                and self.url == msg.url
 
 class DeleteImageMsg():
-    def __init__(self, filename: str) -> None:
+    def __init__(
+        self,
+        filename: str = None
+        ) -> None:
         self.filename = filename
             
     def serialize(self):
-        pass        
+        mime_multipart = MIMEMultipart()
+        part = MIMEText(self.url)
+        part.add_header('Content-ID', 'filename')
+        mime_multipart.attach(part)
+        return mime_multipart.as_string() 
+    
+    def deserialize(self, frame: stomp.utils.Frame):
+        mime_message: MIMEMessage = email.message_from_string(frame.body)
+        for part in mime_message.walk():
+            if part.get('Content-ID') == 'filename':
+                self.url = part.get_payload(decode=False)
+        self.correlation_id = frame.headers.get('correlation_id')
