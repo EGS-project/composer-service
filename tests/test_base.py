@@ -2,6 +2,8 @@ import io
 from fastapi import UploadFile
 import pytest
 import stomp
+from src.activemq.cache.manager import ActivemqCacheManager
+from src.activemq.cache.cache import ActivemqMessageCache
 from src.conversion.schemas import ConversionCreate
 from src.conversion.message import ConvertImageMsg, ConvertImageReplyMsg
 from src.activemq.dispatcher import ActivemqDispatcher
@@ -24,10 +26,31 @@ def message_factory() -> MessageFactory:
     return MessageFactory()
 
 @pytest.fixture()
-def mocked_upload_file() -> UploadFile:
-    with open('sample_images/raccoon.jpg', 'rb') as f:
+def mocked_upload_file_jpg(ext = 'jpg') -> UploadFile:
+    with open(f'sample_images/raccoon.{ext}', 'rb') as f:
         return UploadFile(
-            filename='raccoon.jpg',
+            filename=f'raccoon.{ext}',
             file=io.BytesIO(f.read()),
             headers={"content-type": "image/jpeg"}
             )
+
+@pytest.fixture()
+def mocked_upload_file_png(ext = 'png') -> UploadFile:
+    with open(f'sample_images/raccoon.{ext}', 'rb') as f:
+        return UploadFile(
+            filename=f'raccoon.{ext}',
+            file=io.BytesIO(f.read()),
+            headers={"content-type": "image/png"}
+            )
+
+@pytest.fixture()
+def activemq_message_cache():
+    return ActivemqMessageCache()
+
+@pytest.fixture()
+def activemq_cache_manager(
+    activemq_message_cache: ActivemqMessageCache
+):
+    return ActivemqCacheManager(
+        activemq_message_cache=activemq_message_cache
+    )
