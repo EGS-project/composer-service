@@ -23,8 +23,8 @@ def mocked_delete_image_worker() -> ActiveMqWorker:
         def on_message(self, frame: stomp.utils.Frame):
             msg = DeleteImageMsg()
             msg.deserialize(frame=frame)
-            global received_msg
-            received_msg = msg
+            global s3_received_delete_msg
+            s3_received_delete_msg = msg
             
     return ActiveMqWorker(
         connection=ActiveMqConnectionFactory.create_connection(
@@ -67,7 +67,7 @@ def test_store_image(
         msg=mocked_delete_image_msg
         )
     
-    time.sleep(2)
+    time.sleep(3)
     
     assert s3_received_delete_msg == mocked_delete_image_msg
     
