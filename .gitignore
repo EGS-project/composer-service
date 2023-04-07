@@ -10,3 +10,5 @@ __
 src/template/*
 certs/
 .DS_Store
+sample_images/result.jpg
+sample_images/reply.png
