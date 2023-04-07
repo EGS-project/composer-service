@@ -11,21 +11,32 @@ from src.activemq.worker import ActiveMqWorker
 from src.activemq.utils import SubIdGenerator
 import src.config as config
 import logging
-from PIL import Image
 import stomp.utils
 from tests.test_base import *
 
 @pytest.fixture()
-def mocked_convert_image_worker() -> ActiveMqWorker:
+def mocked_convert_image_worker(
+    send_conn: stomp.connect.StompConnection11,
+    mocked_convert_image_reply_msg: ConvertImageReplyMsg
+    ) -> ActiveMqWorker:
     class MockedConvertImageListener(stomp.ConnectionListener):
         def __init__(self) -> None:
             super().__init__()
         def on_message(self, frame: stomp.utils.Frame):
             msg = ConvertImageMsg()
             msg.deserialize(frame=frame)
-            with open('sample_images/result.jpg', 'wb') as f:
-                f.write(msg.image_data)
-
+            # for debug
+            # with open('sample_images/result.jpg', 'wb') as f:
+            #     f.write(msg.image_data)
+            # send back mocked message
+            send_conn.send(
+                destination=config.ACTIVEMQ_CONVERT_IMAGE_REPLY_QUEUE,
+                body=mocked_convert_image_reply_msg.serialize(),
+                headers={
+                    'content-type': 'multipart/related',
+                    'correlation_id': mocked_convert_image_reply_msg.correlation_id
+                    }
+            )
             
     return ActiveMqWorker(
         connection=ActiveMqConnectionFactory.create_connection(
@@ -52,28 +63,44 @@ def activemq_worker_manager(
 @pytest.fixture()
 def mocked_convert_image_msg(
     message_factory: MessageFactory,
-    mocked_upload_file: UploadFile
+    mocked_upload_file_jpg: UploadFile
     ) -> ConvertImageMsg:
     return message_factory.create_convert_image_message(
-        file=mocked_upload_file,
+        file=mocked_upload_file_jpg,
         conv_create=ConversionCreate(format='png', size=9876),
         correlation_id='generate_me_pls_123'
     )
+    
+@pytest.fixture()
+def mocked_convert_image_reply_msg(
+    mocked_upload_file_png: UploadFile
+    ) -> ConvertImageReplyMsg:
+    return ConvertImageReplyMsg(
+        image_data=mocked_upload_file_png.file.read(),
+        correlation_id='generate_me_pls_123'
+        )
 
 def test_convert_image(
     activemq_dispatcher: ActivemqDispatcher, 
     activemq_worker_manager: ActivemqWorkerManager,
-    mocked_convert_image_msg: ConvertImageMsg
+    mocked_convert_image_msg: ConvertImageMsg,
+    mocked_convert_image_reply_msg: ConvertImageReplyMsg,
+    activemq_cache_manager: ActivemqCacheManager
     ):
     assert type(activemq_dispatcher) == ActivemqDispatcher
     assert type(activemq_worker_manager) == ActivemqWorkerManager
     assert type(mocked_convert_image_msg) == ConvertImageMsg
+    assert type(mocked_convert_image_reply_msg) == ConvertImageReplyMsg
+    assert type(activemq_cache_manager) == ActivemqCacheManager
     
     activemq_worker_manager.submit_threadpool()
+
+    activemq_dispatcher.send_convert_image_message(
+        msg=mocked_convert_image_msg
+        )
     
-    activemq_dispatcher.send_convert_image_message(msg=mocked_convert_image_msg)
+    assert activemq_cache_manager.await_reply_message(
+        correlation_id=mocked_convert_image_msg.correlation_id
+        ) == mocked_convert_image_reply_msg
     
-    
-    time.sleep(180)
     activemq_worker_manager.stop_threadpool()
-    
