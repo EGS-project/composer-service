@@ -83,7 +83,7 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Image'
+                  - $ref: '#/components/schemas/Conversion'
         '400':
           description: BadRequest
           content:
@@ -216,38 +216,32 @@ components:
             type: string
             description: "User's download links from his conversion history"
             default: "localhost.com/resource.jpeg"
-    Image:
+    Conversion:
+      required:
+        - format
+        - size
+        - link
+      properties:
+        format:
+          type: string
+          default: jpeg
+        size:
+          type: integer
+          description: image size in bytes
+          default: -1
+        link:
+          type: string
+          description: image download link
+          default: "localhost:1234/image.jpeg"
+    conversion_details:
       type: object
       required:
-        - image
+        - time
       properties:
-        image:
-          type: object
-          required:
-            - format
-            - size
-            - link
-          properties:
-            format:
-              type: string
-              default: jpeg
-            size:
-              type: integer
-              description: image size in bytes
-              default: -1
-            link:
-              type: string
-              description: image download link
-              default: "localhost:1234/image.jpeg"
-        conversion_details:
-          type: object
-          required:
-            - time
-          properties:
-            time:
-              type: integer
-              description: conversion time in milliseconds
-    
+        time:
+          type: integer
+          description: conversion time in milliseconds
+  
     
     # Error Response
     Unauthorized:
