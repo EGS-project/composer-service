@@ -126,7 +126,7 @@ class DeleteImageMsg():
             
     def serialize(self):
         mime_multipart = MIMEMultipart()
-        part = MIMEText(self.url)
+        part = MIMEText(self.filename)
         part.add_header('Content-ID', 'filename')
         mime_multipart.attach(part)
         return mime_multipart.as_string() 
@@ -135,5 +135,8 @@ class DeleteImageMsg():
         mime_message: MIMEMessage = email.message_from_string(frame.body)
         for part in mime_message.walk():
             if part.get('Content-ID') == 'filename':
-                self.url = part.get_payload(decode=False)
-        self.correlation_id = frame.headers.get('correlation_id')
+                self.filename = part.get_payload(decode=False)
+
+    def __eq__(self, msg):
+        return isinstance(msg, DeleteImageMsg) \
+                and self.filename == msg.filename
