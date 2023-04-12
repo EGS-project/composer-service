@@ -1,9 +1,11 @@
 '''main.py is a root of the project, which inits the FastAPI app'''
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from src.activemq.manager import ActivemqWorkerManager
+from src.activemq.dependencies import activemq_worker_manager
 from src.database.dependencies import db_engine
 from docs.dependencies import custom_openapi
 from src.auth.router import auth_router
@@ -30,9 +32,16 @@ app.add_middleware(
 
 
 @app.on_event("startup")
-def startup_event():
+def startup_event() -> None:
     user_models.Base.metadata.create_all(bind=db_engine)
+    activemq_worker_manager.submit_threadpool()
     
+@app.on_event("shutdown")
+def shutdown_event() -> None:
+    # user_models.Base.metadata.drop_all(bind=db_engine)
+    activemq_worker_manager.stop_threadpool()
+
+        
     
 app.include_router(router=auth_router)
 app.include_router(router=user_router)
