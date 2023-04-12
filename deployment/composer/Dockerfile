@@ -1,12 +1,11 @@
-FROM python:3
+FROM python:3.10
 
 WORKDIR /home/app
 
 #If we add the requirements and install dependencies first, docker can use cache if requirements don't change
-ADD requirements.txt /home/app
-RUN pip install --no-cache-dir -r requirements.txt
-
 ADD . /home/app
-CMD python app.py
+RUN pip install --no-cache-dir -r ./deployment/composer/requirements/base.txt
 
-EXPOSE 3000
+CMD python3 src/main.py
+
+EXPOSE 4002

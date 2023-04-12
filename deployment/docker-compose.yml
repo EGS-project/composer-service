@@ -17,6 +17,8 @@ services:
     restart: on-failure
     volumes:
       - ./deployment/mysql/config.sql:/docker-entrypoint-initdb.d/data.sql
+    # networks:
+      # - super_network
 
   activemq:
     image: rmohr/activemq:5.15.9
@@ -28,3 +30,26 @@ services:
     environment:
       ACTIVEMQ_ADMIN_LOGIN: admin
       ACTIVEMQ_ADMIN_PASSWORD: admin
+    # networks:
+    #   - super_network
+
+  composer:
+    build:
+      context: ../
+      dockerfile: ./deployment/composer/Dockerfile
+    container_name: composer
+    ports:
+      - "4002:4002"
+    depends_on:
+      - mysql
+      - activemq
+    # networks:
+      # - super_network
+    restart: on-failure
+    env_file: ../docker-compose.env
+    environment:
+      - PYTHONPATH=/home/app
+
+
+networks:
+  super_network: {}
