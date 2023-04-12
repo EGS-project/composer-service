@@ -8,8 +8,11 @@ composer:
 connect:
 	mongosh "mongodb+srv://cluster0.drjdqw7.mongodb.net/super_mongo_db" --apiVersion 1 --username super_egs_adm1n
 
-access:
+access_db:
 	docker exec -it mysql /bin/bash
+
+access_composer:
+	docker exec -it composer /bin/bash
 	
 clean:
 	docker rmi -f $(shell docker images -aq)
