@@ -1,11 +1,11 @@
-
-
 import email
 from email.mime.message import MIMEMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 import stomp
 import stomp.utils
+
 
 class NotificationMsg():
     def __init__(
@@ -16,7 +16,7 @@ class NotificationMsg():
         email: str = None,
         subject: str = None,
         message: str = None,
-        phone_number: str = None
+        phone_number: str = None,
         ) -> None:
         self.send_email = send_email
         self.send_whatsapp = send_whatsapp
