@@ -1,6 +1,7 @@
 import pytest
 import stomp
 import stomp.utils
+from src.activemq.cache.utils import CorrelationIdGenerator
 from src.activemq.utils import SubIdGenerator
 from src.activemq.worker import ActiveMqWorker
 from src.activemq.manager import ActivemqWorkerManager
@@ -55,20 +56,27 @@ def activemq_worker_manager(
     ])
     
 @pytest.fixture()
+def correlation_id() -> str:
+    return CorrelationIdGenerator.generate()
+
+@pytest.fixture()
 def mocked_get_image_msg(
-    message_factory: MessageFactory
+    message_factory: MessageFactory,
+    correlation_id: str
     ) -> StoreImageMsg:
     return message_factory.create_get_image_message(
         filename='raccoon.png',
-        correlation_id='generate_me_pls_456'
+        correlation_id=correlation_id
     )
     
     
 @pytest.fixture()
-def mocked_get_image_reply_msg() -> GetImageReplyMsg:
+def mocked_get_image_reply_msg(
+    correlation_id: str
+    ) -> GetImageReplyMsg:
     return GetImageReplyMsg(
         url='www.thisismydownloadsuperurl.pls/raccoon.png',
-        correlation_id='generate_me_pls_456'
+        correlation_id=correlation_id
         )
 
 

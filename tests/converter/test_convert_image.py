@@ -1,18 +1,23 @@
+import logging
 import time
-from fastapi import UploadFile
+
 import pytest
 import stomp
-from src.conversion.schemas import ConversionCreate
-from src.conversion.message import ConvertImageMsg, ConvertImageReplyMsg
-from src.activemq.dispatcher import ActivemqDispatcher
-from src.activemq.factory import ActiveMqConnectionFactory, MessageFactory, ActivemqWorkerFactory
-from src.activemq.manager import ActivemqWorkerManager
-from src.activemq.worker import ActiveMqWorker
-from src.activemq.utils import SubIdGenerator
-import src.config as config
-import logging
 import stomp.utils
+from fastapi import UploadFile
+
+import src.config as config
+from src.activemq.cache.utils import CorrelationIdGenerator
+from src.activemq.dispatcher import ActivemqDispatcher
+from src.activemq.factory import (ActiveMqConnectionFactory,
+                                  ActivemqWorkerFactory, MessageFactory)
+from src.activemq.manager import ActivemqWorkerManager
+from src.activemq.utils import SubIdGenerator
+from src.activemq.worker import ActiveMqWorker
+from src.conversion.message import ConvertImageMsg, ConvertImageReplyMsg
+from src.conversion.schemas import ConversionCreate
 from tests.test_base import *
+
 
 @pytest.fixture()
 def mocked_convert_image_worker(
@@ -33,7 +38,7 @@ def mocked_convert_image_worker(
                 destination=config.ACTIVEMQ_CONVERT_IMAGE_REPLY_QUEUE,
                 body=mocked_convert_image_reply_msg.serialize(),
                 headers={
-                    'content-type': 'multipart/related',
+                    'content-type': 'multipart/mixed',
                     'correlation_id': mocked_convert_image_reply_msg.correlation_id
                     }
             )
@@ -61,23 +66,29 @@ def activemq_worker_manager(
     ])
 
 @pytest.fixture()
+def correlation_id() -> str:
+    return CorrelationIdGenerator.generate()
+
+@pytest.fixture()
 def mocked_convert_image_msg(
     message_factory: MessageFactory,
-    mocked_upload_file_jpg: UploadFile
+    mocked_upload_file_jpg: UploadFile,
+    correlation_id: str
     ) -> ConvertImageMsg:
     return message_factory.create_convert_image_message(
         file=mocked_upload_file_jpg,
         conv_create=ConversionCreate(format='png', size=9876),
-        correlation_id='generate_me_pls_123'
+        correlation_id=correlation_id
     )
     
 @pytest.fixture()
 def mocked_convert_image_reply_msg(
-    mocked_upload_file_png: UploadFile
+    mocked_upload_file_png: UploadFile,
+    correlation_id: str
     ) -> ConvertImageReplyMsg:
     return ConvertImageReplyMsg(
         image_data=mocked_upload_file_png.file.read(),
-        correlation_id='generate_me_pls_123'
+        correlation_id=correlation_id
         )
 
 def test_convert_image(
