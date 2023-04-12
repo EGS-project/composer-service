@@ -1,9 +1,7 @@
 import src.user.models as models
+from src.auth.constants import CLASSICO, GITHUB, GOOGLE
 from src.auth.utils import retrieve_auth_type
 from src.user.factory import UserFactory
-from src.auth.constants import CLASSICO, GOOGLE, GITHUB
-
-from src.user.utils import build_user_create
 from src.user.repository import UserRepository
 
 '''
