@@ -22,7 +22,7 @@ class ConvertImageMsg(CachedMessage):
     def serialize(self) -> str:
         mime_multipart = MIMEMultipart()
         part = MIMEImage(self.image_data)
-        part.add_header('Content-ID', 'convert_image')
+        part.add_header('Content-ID', 'data')
         mime_multipart.attach(part)
         part = MIMEText(self.image_format)
         part.add_header('Content-ID', 'image_format')
@@ -32,7 +32,7 @@ class ConvertImageMsg(CachedMessage):
     def deserialize(self, frame: stomp.utils.Frame) -> None:
         mime_message: MIMEMessage = email.message_from_string(frame.body)
         for part in mime_message.walk():
-            if part.get('Content-ID') == 'convert_image' and part.get_content_type().startswith('image/'):
+            if part.get('Content-ID') == 'data':
                 self.image_data = part.get_payload(decode=True)
             elif part.get('Content-ID') == 'image_format':
                 self.image_format = part.get_payload(decode=True)
@@ -50,14 +50,14 @@ class ConvertImageReplyMsg(CachedMessage):
     def serialize(self):
         mime_multipart = MIMEMultipart()
         part = MIMEImage(self.image_data)
-        part.add_header('Content-ID', 'convert_image_reply')
+        part.add_header('Content-ID', 'data')
         mime_multipart.attach(part)
         return mime_multipart.as_string()
         
     def deserialize(self, frame: stomp.utils.Frame):
         mime_message: MIMEMessage = email.message_from_string(frame.body)
         for part in mime_message.walk():
-            if part.get('Content-ID') == 'convert_image_reply' and part.get_content_type().startswith('image/'):
+            if part.get('Content-ID') == 'data':
                 self.image_data = part.get_payload(decode=True)
         self.correlation_id = frame.headers.get('correlation_id')
         
