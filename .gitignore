@@ -1,4 +1,4 @@
-.env
+*.env
 __pycache__/
 *.py[cod]
 *.iml
@@ -12,4 +12,3 @@ certs/
 .DS_Store
 sample_images/result.jpg
 sample_images/reply.png
-docker-compose.env
