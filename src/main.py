@@ -1,10 +1,9 @@
 '''main.py is a root of the project, which inits the FastAPI app'''
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from src.activemq.manager import ActivemqWorkerManager
 from src.activemq.dependencies import activemq_worker_manager
 from src.database.dependencies import db_engine
 from docs.dependencies import custom_openapi
@@ -54,7 +53,7 @@ if __name__ == '__main__':
         host=config.APP_HOST,
         port=int(config.APP_PORT),
         reload=True,
-        server_header=False,
-        ssl_certfile="certs/composer_public_key.pem",
-        ssl_keyfile="certs/composer_private_key.pem"
+        # server_header=False,
+        # ssl_certfile="certs/composer_public_key.pem",
+        # ssl_keyfile="certs/composer_private_key.pem"
     )
