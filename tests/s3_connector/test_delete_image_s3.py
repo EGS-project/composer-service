@@ -50,7 +50,7 @@ def mocked_delete_image_msg(
         filename='raccoon.png'
     )
 
-def test_store_image(
+def test_delete_image(
     activemq_dispatcher: ActivemqDispatcher, 
     activemq_worker_manager: ActivemqWorkerManager,
     mocked_delete_image_msg: DeleteImageMsg,

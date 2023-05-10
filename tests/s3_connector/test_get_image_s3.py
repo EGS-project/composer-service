@@ -10,6 +10,7 @@ from src.activemq.dispatcher import ActivemqDispatcher
 from src.activemq.factory import ActiveMqConnectionFactory, ActivemqWorkerFactory, MessageFactory
 import src.config as config
 import logging
+import time
 from tests.test_base import *
 
 @pytest.fixture()
@@ -57,7 +58,8 @@ def activemq_worker_manager(
     
 @pytest.fixture()
 def correlation_id() -> str:
-    return CorrelationIdGenerator.generate()
+    # return CorrelationIdGenerator.generate()
+    return 'CorrelationIdGenerator.generate()'
 
 @pytest.fixture()
 def mocked_get_image_msg(
@@ -99,8 +101,11 @@ def test_get_image(
         msg=mocked_get_image_msg
         )
     
-    assert activemq_cache_manager.await_reply_message(
+    time.sleep(3)
+    
+    await_msg = activemq_cache_manager.await_reply_message(
         correlation_id=mocked_get_image_msg.correlation_id
-        ) == mocked_get_image_reply_msg
+        )
+    assert await_msg == mocked_get_image_reply_msg
     
     activemq_worker_manager.stop_threadpool()

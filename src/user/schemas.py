@@ -15,6 +15,13 @@ class User(BaseModel):
     
     class Config:
         orm_mode = True
+        
+    @classmethod
+    def from_orm(cls, user):
+        data = user.__dict__.copy()
+        conv_history_str = data.pop('conv_history')
+        data['conv_history'] = conv_history_str.strip('[]').replace("'", "").split(", ")
+        return cls(**data)
 
 '''Create'''
 class UserCreate(User):

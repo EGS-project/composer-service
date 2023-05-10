@@ -2,6 +2,7 @@ from fastapi import UploadFile
 import stomp
 import stomp.connect as connect
 from src.activemq.cache.cache import ActivemqMessageCache
+from src.activemq.cache.dependencies import activemq_message_cache
 from src.s3_connector.listener import GetImageReplyListener, StoreImageReplyListener
 from src.activemq.utils import SubIdGenerator
 from src.activemq.worker import ActiveMqWorker
@@ -44,7 +45,7 @@ class ActivemqWorkerFactory:
     def create_convert_image_reply_worker(cls) -> ActiveMqWorker:
         return ActiveMqWorker(
             connection=ActiveMqConnectionFactory.create_connection(
-                listener=ConvertImageReplyListener(activemq_message_cache=ActivemqMessageCache())
+                listener=ConvertImageReplyListener(activemq_message_cache=activemq_message_cache)
                 ),
             sub_id=SubIdGenerator.generate_next(),
             queue=config.ACTIVEMQ_CONVERT_IMAGE_REPLY_QUEUE
@@ -54,7 +55,9 @@ class ActivemqWorkerFactory:
     def create_store_image_reply_worker(cls) -> ActiveMqWorker:
         return ActiveMqWorker(
             connection=ActiveMqConnectionFactory.create_connection(
-                listener=StoreImageReplyListener(activemq_message_cache=ActivemqMessageCache())
+                listener=StoreImageReplyListener(
+                    activemq_message_cache=activemq_message_cache
+                    )
                 ),
             sub_id=SubIdGenerator.generate_next(),
             queue=config.ACTIVEMQ_STORE_IMAGE_REPLY_QUEUE
@@ -64,7 +67,7 @@ class ActivemqWorkerFactory:
     def create_get_image_reply_worker(cls) -> ActiveMqWorker:
         return ActiveMqWorker(
             connection=ActiveMqConnectionFactory.create_connection(
-                listener=GetImageReplyListener(activemq_message_cache=ActivemqMessageCache())
+                listener=GetImageReplyListener(activemq_message_cache=activemq_message_cache)
                 ),
             sub_id=SubIdGenerator.generate_next(),
             queue=config.ACTIVEMQ_GET_IMAGE_REPLY_QUEUE
