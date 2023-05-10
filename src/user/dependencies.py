@@ -31,10 +31,10 @@ def current_user(
     session_data: SessionData = Depends(session_data),
     user_repository: UserRepository = Depends(user_repository)
     ) -> models.User:
-    try:
-        return user_repository.get_user(user_id=session_data.user_id)
-    except Exception as e:
+    if user := user_repository.get_user(user_id=session_data.user_id):
+        return user
+    else:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail="Unprocessable entity.",
-        ) from e
+        )
