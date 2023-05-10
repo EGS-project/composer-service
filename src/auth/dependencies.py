@@ -63,7 +63,9 @@ class Auth0:
 api_key_cookie = APIKeyCookie(name=config.APP_COOKIE_NAME, auto_error=True)
 
 
-def session_data(cookie: str = Depends(api_key_cookie)) -> SessionData:
+def session_data(
+    cookie: str = Depends(api_key_cookie)
+    ) -> SessionData:
     try:
         return SessionData.parse_obj(decoded_value(cookie))
     except Exception as e:

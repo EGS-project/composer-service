@@ -17,7 +17,7 @@ class ResponseFactory:
         response.set_cookie(
             key = config.APP_COOKIE_NAME,
             value = encoded_value(SessionFactory.create_session(user=user)),
-            domain = config.APP_HOST,
+            domain = config.WEB_SERVICE_AUDIENCE,
             path = '/',
             samesite="none",    
             secure=True)
