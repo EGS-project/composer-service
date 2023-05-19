@@ -4,7 +4,8 @@ from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from src.activemq.dependencies import activemq_worker_manager
+from src.activemq.factory import ActivemqWorkerFactory
+from src.activemq.manager import ActivemqWorkerManager
 from src.database.dependencies import db_engine
 from docs.dependencies import custom_openapi
 from src.auth.router import auth_router
@@ -29,18 +30,21 @@ app.add_middleware(
     allow_headers=["*"],
     )
 
+activemq_worker_manager_instance: ActivemqWorkerManager = ActivemqWorkerManager(workers=[
+        ActivemqWorkerFactory.create_convert_image_reply_worker(),
+        ActivemqWorkerFactory.create_store_image_reply_worker(),
+        ActivemqWorkerFactory.create_get_image_reply_worker()
+    ])
 
 @app.on_event("startup")
 def startup_event() -> None:
     user_models.Base.metadata.create_all(bind=db_engine)
-    activemq_worker_manager.submit_threadpool()
+    activemq_worker_manager_instance.submit_threadpool()
     
 @app.on_event("shutdown")
 def shutdown_event() -> None:
     # user_models.Base.metadata.drop_all(bind=db_engine)
-    activemq_worker_manager.stop_threadpool()
-
-        
+    activemq_worker_manager_instance.stop_threadpool()
     
 app.include_router(router=auth_router)
 app.include_router(router=user_router)
@@ -52,7 +56,7 @@ if __name__ == '__main__':
         "main:app",
         host=config.APP_HOST,
         port=int(config.APP_PORT),
-        reload=True,
+        reload=False,
         # server_header=False,
         # ssl_certfile="certs/composer_public_key.pem",
         # ssl_keyfile="certs/composer_private_key.pem"

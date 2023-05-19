@@ -53,7 +53,7 @@ async def convert_to_jpeg(
         message_factory.create_store_image_message(
             filename=FilenameGenerator.generate(
                 user_id=current_user.id,
-                original_filename=file.filename),
+                ext=conv_create.format),
             image_data=convert_reply.image_data,
             correlation_id=correlation_id            
         )

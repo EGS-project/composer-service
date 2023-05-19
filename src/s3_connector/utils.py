@@ -6,7 +6,7 @@ class FilenameGenerator:
     def generate(
         cls, 
         user_id: int,
-        original_filename: str
+        ext: str
         ) -> str:
-        return f'{uuid.uuid4().__str__()}-{user_id}-{original_filename}'
+        return f'userid_{user_id}_{uuid.uuid4().__str__()}.{ext.lower()}'
     

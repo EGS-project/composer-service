@@ -1,6 +1,5 @@
 from fastapi import Depends
 import stomp.connect as connect
-from src.activemq.worker import ActiveMqWorker
 from src.activemq.manager import ActivemqWorkerManager
 from src.activemq.cache.cache import ActivemqMessageCache
 from src.activemq.cache.manager import ActivemqCacheManager
@@ -33,13 +32,3 @@ def activemq_cache_manager(
     return ActivemqCacheManager(
         activemq_message_cache=activemq_message_cache
     )
-
-
-def activemq_worker_manager() -> ActivemqWorkerManager:
-    return ActivemqWorkerManager(workers=[
-        ActivemqWorkerFactory.create_convert_image_reply_worker(),
-        ActivemqWorkerFactory.create_store_image_reply_worker(),
-        ActivemqWorkerFactory.create_get_image_reply_worker()
-    ])
-
-activemq_worker_manager: ActivemqWorkerManager = activemq_worker_manager()

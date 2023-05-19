@@ -8,11 +8,8 @@ from src.s3_connector.message import GetImageReplyMsg, StoreImageReplyMsg
 
 
 class GetImageReplyListener(ReplyListener):
-    def __init__(self, activemq_message_cache: ActivemqMessageCache) -> None:
-        ReplyListener.__init__(
-            self, 
-            activemq_message_cache=activemq_message_cache
-            )
+    def __init__(self) -> None:
+        ReplyListener.__init__(self)
         
     def on_message(self, frame: stomp.utils.Frame):
         msg = GetImageReplyMsg()
@@ -20,11 +17,8 @@ class GetImageReplyListener(ReplyListener):
         self.activemq_message_cache.push(msg=msg)
     
 class StoreImageReplyListener(ReplyListener):
-    def __init__(self, activemq_message_cache: ActivemqMessageCache) -> None:
-        ReplyListener.__init__(
-            self, 
-            activemq_message_cache=activemq_message_cache
-            )
+    def __init__(self) -> None:
+        ReplyListener.__init__(self)
         
     def on_message(self, frame: stomp.utils.Frame):
         msg = StoreImageReplyMsg()

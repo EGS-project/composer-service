@@ -11,14 +11,8 @@ from src.conversion.message import ConvertImageReplyMsg
 
 
 class ConvertImageReplyListener(ReplyListener):
-    def __init__(
-        self, 
-        activemq_message_cache: ActivemqMessageCache
-        ) -> None:
-        ReplyListener.__init__(
-            self,
-            activemq_message_cache=activemq_message_cache
-            )
+    def __init__(self) -> None:
+        ReplyListener.__init__(self)
         
     def on_message(self, frame: stomp.utils.Frame):
         msg = ConvertImageReplyMsg()
