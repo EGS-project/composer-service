@@ -23,9 +23,12 @@ WEB_SERVICE_AUDIENCE=env.get('WEB_SERVICE_AUDIENCE', 'localhost')
 
 # CORS
 BACKEND_CORS_ORIGINS = [
-    f"http://{APP_HOST}:{APP_PORT}",
-    f"http://127.0.0.1:{APP_PORT}",
-    f"http://localhost:{APP_PORT}",
+    # f"http://{APP_HOST}:{APP_PORT}",
+    # f"http://127.0.0.1:{APP_PORT}",
+    # f"http://localhost:{APP_PORT}",
+    # f"http://localhost:8000",
+    # f"http://localhost:80",
+    "*"
 ]
 
 # SSL
