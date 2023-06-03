@@ -6,8 +6,8 @@ clean:
 
 REGISTRY := registry.deti:5000
 NAMESPACE := egs-conv
-SERVICE := composer-service
-VERSION := v1
+SERVICE := notification-service
+VERSION := latest
 
 build:
 	docker buildx build --platform linux/amd64 --network=host -t ${REGISTRY}/$(NAMESPACE)/$(SERVICE):$(VERSION) .

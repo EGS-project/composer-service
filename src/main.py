@@ -1,5 +1,6 @@
 '''main.py is a root of the project, which inits the FastAPI app'''
 
+import logging
 from fastapi import FastAPI
 import uvicorn
 from starlette.middleware.sessions import SessionMiddleware
@@ -15,6 +16,11 @@ from src.healthcheck.router import healthcheck_router
 import src.user.models as user_models
 import src.config as config
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 app = FastAPI(openapi_url="/api/v1/openapi.yaml")
 # app.openapi = custom_openapi

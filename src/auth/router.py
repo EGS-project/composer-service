@@ -1,6 +1,8 @@
 '''router.py is a core of each module with all the endpoints'''
 
 from http import HTTPStatus
+import json
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, routing
 from starlette.responses import RedirectResponse, JSONResponse
 from src.auth.factory import ResponseFactory
@@ -23,8 +25,23 @@ async def auth(
     user_manager: UserManager = Depends(user_manager),
     response_factory: ResponseFactory = Depends(ResponseFactory)
     ):
+    logging.info(
+        f'''Obtaining token... Request:
+        cookie: {request.cookies.keys()}
+        base_url: {request.base_url}
+        url: {request.url}
+        ''')
     token: dict = await auth_client.get_token(request)
+    logging.info(
+        f'''Is token present: {token is not None}... Request:
+        cookie: {request.cookies.keys()}
+        base_url: {request.base_url}
+        url: {request.url}
+        ''')
+    logging.info(f'Processing user auth... userinfo: {token["userinfo"]}')
     user: models.User = user_manager.process_user_auth(userinfo=token['userinfo'])
+    logging.info(f'User email: {user.email} ')
+
     return response_factory.auth_response(user=user)
 
 
@@ -33,8 +50,10 @@ async def login(
     request: Request, 
     auth_client: Auth0 = Depends(Auth0)
     ):
-    
-    return await auth_client.authorize_redirect(request, request.url_for('auth'))
+    redirect_uri = request.url_for('auth')
+    logging.info(f'login: redirect uri: {redirect_uri}')
+
+    return await auth_client.authorize_redirect(request, redirect_uri)
 
 
 @auth_router.get("/api/v1/logout")
@@ -52,4 +71,5 @@ async def logout(
 
 @auth_router.get('/')
 async def homepage(cookie: str = Depends(api_key_cookie)):
+
     return JSONResponse(content=f'Decoded cookie: {decoded_value(cookie)}', status_code=HTTPStatus.OK)

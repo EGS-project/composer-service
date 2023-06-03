@@ -27,7 +27,7 @@ conversion_router = APIRouter()
 @conversion_router.post('/api/v1/convert')
 async def convert_to_jpeg(
     conv_create: ConversionCreate = Depends(ConversionCreate),
-    file: UploadFile = File(),
+    image: UploadFile = File(),
     dispatcher: ActivemqDispatcher = Depends(activemq_dispatcher),
     activemq_cache_manager: ActivemqCacheManager = Depends(activemq_cache_manager),
     message_factory: MessageFactory = Depends(MessageFactory),
@@ -38,7 +38,7 @@ async def convert_to_jpeg(
     # correlation_id = '1234' # integration local test
     dispatcher.send_convert_image_message(
         message_factory.create_convert_image_message(
-            file=file, 
+            file=image, 
             conv_create=conv_create, 
             correlation_id=correlation_id
             )

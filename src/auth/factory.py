@@ -1,6 +1,7 @@
 
 
 from http import HTTPStatus
+import logging
 from fastapi import Request, Response
 from src.auth.schemas import SessionData
 from src.auth.utils import encoded_value
@@ -20,18 +21,26 @@ class ResponseFactory:
             domain = config.WEB_SERVICE_AUDIENCE,
             path = '/',
             samesite="none",    
-            secure=True)
+            secure=True,
+            httponly=True)
         
+        logging.info(
+            f'''Sending set-cookie response... Response:
+            code: {response.status_code}
+            body: {response.body}
+            cookie: {response.headers.get('set-cookie')}
+            ''')
         return response
     
     
     def logout_response(self, response: Response) -> Response:
         response.delete_cookie(
             key = config.APP_COOKIE_NAME,
-            domain = config.APP_HOST,
+            domain = config.WEB_SERVICE_AUDIENCE,
             path = '/',
             samesite = "none",
-            secure=True)
+            secure=True,
+            httponly=True)
         
         return response
 

@@ -1,6 +1,7 @@
 '''dependencies.py - Dependency Injection for router.py'''
 
 from http import HTTPStatus
+import logging
 from fastapi import Depends, HTTPException, Request
 from src.auth.schemas import SessionData
 from src.auth.utils import decoded_value
@@ -33,6 +34,7 @@ class Auth0:
 
     async def get_token(self, request) -> dict:
         try:
+
             return await self.client.authorize_access_token(request)
         except Exception as e:
             raise HTTPException(
@@ -41,6 +43,7 @@ class Auth0:
 
     async def authorize_redirect(self, request: Request, redirect_uri: str):
         try:
+
             return await self.client.authorize_redirect(request, redirect_uri)
         except HTTPException as e:
             raise HTTPException(
