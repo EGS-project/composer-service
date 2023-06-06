@@ -20,7 +20,7 @@ AUTH0_DOMAIN=env.get('AUTH0_DOMAIN', 'default')
 
 # WEB_SERVICE
 WEB_SERVICE_AUDIENCE=env.get('WEB_SERVICE_AUDIENCE', 'localhost')
-
+CORS_ORIGIN_DNS=env.get('CORS_ORIGIN_DNS', 'http://egs-conv.deti')
 # CORS
 BACKEND_CORS_ORIGINS = [
     # f"http://{APP_HOST}:{APP_PORT}",
@@ -28,7 +28,10 @@ BACKEND_CORS_ORIGINS = [
     # f"http://localhost:{APP_PORT}",
     # f"http://localhost:8000",
     # f"http://localhost:80",
-    "*"
+    f'https://{AUTH0_DOMAIN}/*',
+    f'https://{AUTH0_DOMAIN}',
+    f'http://{CORS_ORIGIN_DNS}',
+    f'http:/{CORS_ORIGIN_DNS}/*',
 ]
 
 # SSL

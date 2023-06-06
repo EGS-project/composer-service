@@ -1,20 +1,22 @@
 '''main.py is a root of the project, which inits the FastAPI app'''
 
 import logging
-from fastapi import FastAPI
+
 import uvicorn
-from starlette.middleware.sessions import SessionMiddleware
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+
+import src.config as config
+import src.user.models as user_models
+from docs.dependencies import custom_openapi
 from src.activemq.factory import ActivemqWorkerFactory
 from src.activemq.manager import ActivemqWorkerManager
-from src.database.dependencies import db_engine
-from docs.dependencies import custom_openapi
 from src.auth.router import auth_router
 from src.conversion.router import conversion_router
-from src.user.router import user_router
+from src.database.dependencies import db_engine
 from src.healthcheck.router import healthcheck_router
-import src.user.models as user_models
-import src.config as config
+from src.user.router import user_router
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -34,6 +36,7 @@ app.add_middleware(
     allow_origins=[str(origin) for origin in config.BACKEND_CORS_ORIGINS],
     allow_methods=["*"],
     allow_headers=["*"],
+    # expose_headers=["*"]
     )
 
 activemq_worker_manager_instance: ActivemqWorkerManager = ActivemqWorkerManager(workers=[

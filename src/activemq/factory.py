@@ -82,7 +82,7 @@ class MessageFactory:
         ) -> ConvertImageMsg:
         return ConvertImageMsg(
             image_data=file.file.read(), 
-            image_format=conv_create.format,
+            image_format=conv_create.target_format,
             correlation_id=correlation_id
             )
     

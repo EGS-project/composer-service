@@ -1,6 +1,7 @@
 '''router.py is a core of each module with all the endpoints'''
 
 from http import HTTPStatus
+import logging
 
 from fastapi import (APIRouter, Depends, FastAPI, File, Form, Request,
                      Response, UploadFile)
@@ -15,7 +16,6 @@ from src.activemq.dispatcher import ActivemqDispatcher
 from src.activemq.factory import MessageFactory
 from src.auth.dependencies import session_data
 from src.auth.schemas import SessionData
-from src.conversion.factory import ResponseFactory
 from src.conversion.message import ConvertImageReplyMsg
 from src.conversion.schemas import ConversionCreate, ConversionRead
 from src.s3_connector.message import StoreImageReplyMsg
@@ -31,11 +31,11 @@ async def convert_to_jpeg(
     dispatcher: ActivemqDispatcher = Depends(activemq_dispatcher),
     activemq_cache_manager: ActivemqCacheManager = Depends(activemq_cache_manager),
     message_factory: MessageFactory = Depends(MessageFactory),
-    response_factory: ResponseFactory = Depends(ResponseFactory),
     current_user: models.User = Depends(current_user),
     ):
     correlation_id = CorrelationIdGenerator.generate()
     # correlation_id = '1234' # integration local test
+    logging.info(f'Sending message to conversion service... target_format: {conv_create.target_format}')
     dispatcher.send_convert_image_message(
         message_factory.create_convert_image_message(
             file=image, 
@@ -46,6 +46,8 @@ async def convert_to_jpeg(
     convert_reply: ConvertImageReplyMsg = await activemq_cache_manager.await_reply_message(
         correlation_id=correlation_id
     )
+    logging.info(f'Received converted image. Sending store message...')
+    
 
     correlation_id = CorrelationIdGenerator.generate()
     # correlation_id = '5678' # integration local test
@@ -53,7 +55,7 @@ async def convert_to_jpeg(
         message_factory.create_store_image_message(
             filename=FilenameGenerator.generate(
                 user_id=current_user.id,
-                ext=conv_create.format),
+                ext=conv_create.target_format),
             image_data=convert_reply.image_data,
             correlation_id=correlation_id            
         )
@@ -61,6 +63,8 @@ async def convert_to_jpeg(
     store_reply: StoreImageReplyMsg = await activemq_cache_manager.await_reply_message(
         correlation_id=correlation_id
     )
+    logging.info(f'Received store image, link: {store_reply.url}. Sending notification..')
+    
     
     dispatcher.send_notification_message(
         message_factory.create_notification_message(
@@ -69,11 +73,12 @@ async def convert_to_jpeg(
             message=f'Thank you for using our product. Your link is here: {store_reply.url}'
         )
     )
+    logging.info(f'Notification sent. Sending response...')
 
-    return response_factory.conversion_response(
-        conv_read=ConversionRead(
-            format = conv_create.format,
-            size = conv_create.size,
+    return Response(
+        status_code=HTTPStatus.OK,
+        content=ConversionRead(
+            target_format=conv_create.target_format,
             link = store_reply.url
+        ).json()
         )
-    )

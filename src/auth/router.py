@@ -6,12 +6,9 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, routing
 from starlette.responses import RedirectResponse, JSONResponse
 from src.auth.factory import ResponseFactory
-from src.database.dependencies import database
 from src.auth.dependencies import Auth0
-from src.auth.utils import decoded_value, retrieve_auth_type
-from authlib.integrations.starlette_client import StarletteOAuth2App
+from src.auth.utils import decoded_value
 from src.auth.dependencies import api_key_cookie
-from sqlalchemy.orm import Session
 import src.user.models as models
 from src.user.manager import UserManager
 from src.user.dependencies import user_manager
@@ -51,7 +48,7 @@ async def login(
     auth_client: Auth0 = Depends(Auth0)
     ):
     redirect_uri = request.url_for('auth')
-    logging.info(f'login: redirect uri: {redirect_uri}')
+    logging.info(f'login: redirect uri: {redirect_uri}, adding Access-Control-Allow-Origin')
 
     return await auth_client.authorize_redirect(request, redirect_uri)
 

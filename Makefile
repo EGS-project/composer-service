@@ -6,7 +6,7 @@ clean:
 
 REGISTRY := registry.deti:5000
 NAMESPACE := egs-conv
-SERVICE := notification-service
+SERVICE := composer-service
 VERSION := latest
 
 build:
