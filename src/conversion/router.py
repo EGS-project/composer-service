@@ -14,13 +14,12 @@ from src.activemq.dependencies import (activemq_cache_manager,
                                        activemq_dispatcher)
 from src.activemq.dispatcher import ActivemqDispatcher
 from src.activemq.factory import MessageFactory
-from src.auth.dependencies import session_data
-from src.auth.schemas import SessionData
 from src.conversion.message import ConvertImageReplyMsg
 from src.conversion.schemas import ConversionCreate, ConversionRead
 from src.s3_connector.message import StoreImageReplyMsg
 from src.s3_connector.utils import FilenameGenerator
-from src.user.dependencies import current_user
+from src.user.dependencies import current_user, user_repository
+from src.user.repository import UserRepository
 
 conversion_router = APIRouter()
 
@@ -32,6 +31,7 @@ async def convert_to_jpeg(
     message_factory: MessageFactory = Depends(MessageFactory),
     activemq_cache_manager: ActivemqCacheManager = Depends(activemq_cache_manager),
     current_user: models.User = Depends(current_user),
+    user_repo: UserRepository = Depends(user_repository),
     ):
     correlation_id = CorrelationIdGenerator.generate()
     # correlation_id = '1234' # integration local test
@@ -77,7 +77,13 @@ async def convert_to_jpeg(
                 content='Waiting for conversion message too long',
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR
                 )
+    user_repo.update_conv_history(
+        user=current_user,
+        filename=store_reply.url
+    )
+
     logging.info(f'Received store image, link: {store_reply.url}. Sending notification..')
+    
     
     
     dispatcher.send_notification_message(

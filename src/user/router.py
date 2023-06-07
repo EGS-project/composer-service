@@ -3,14 +3,15 @@
 from http import HTTPStatus
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 import src.user.schemas as schemas
 from src.database.dependencies import database
 import src.user.models as models
-from src.user.dependencies import current_user
+from src.user.dependencies import current_user, user_repository
+from src.user.repository import UserRepository
 
 user_router = APIRouter()
 
@@ -32,4 +33,25 @@ async def get_user(
         profile_picture=current_user.profile_picture,
         conv_history=history.strip('[]').replace("'", "").split(", ")
     )
-    return user_read
+    return Response(
+        content=user_read.json(),
+        status_code=HTTPStatus.OK
+    )
+
+
+# @user_router.post('/api/v1/user/history')
+# async def add_conv(
+#     user_repo: UserRepository = Depends(user_repository),
+#     current_user: models.User = Depends(current_user),
+# ):
+#     import uuid
+#     name = f'{uuid.uuid4()}.jpeg'
+#     user_repo.update_conv_history(
+#         user=current_user,
+#         filename=name
+#     )
+
+#     return Response(
+#         content=f'added {name}',
+#         status_code=HTTPStatus.OK
+#     )
