@@ -79,3 +79,14 @@ class NotificationMsg():
             self.subject == msg.subject and \
             self.message == msg.message and \
             self.phone_number == msg.phone_number
+
+    def __str__(self):
+        return f'''NotificationMsg:
+        send_email: {self.send_email}
+        send_whatsapp: {self.send_whatsapp}
+        send_sms: {self.send_sms}
+        email: {self.email}
+        subject: {self.subject}
+        message: {self.message}
+        phone_number: {self.phone_number}
+        '''

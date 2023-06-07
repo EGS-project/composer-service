@@ -19,7 +19,7 @@ from src.healthcheck.router import healthcheck_router
 from src.user.router import user_router
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )

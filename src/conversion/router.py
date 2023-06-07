@@ -1,10 +1,10 @@
 '''router.py is a core of each module with all the endpoints'''
 
-from http import HTTPStatus
 import logging
+from http import HTTPStatus
 
-from fastapi import (APIRouter, Depends, FastAPI, File, Form, Request,
-                     Response, UploadFile)
+from fastapi import (APIRouter, Depends, FastAPI, File, Form, HTTPException,
+                     Request, Response, UploadFile)
 
 import src.config as config
 import src.user.models as models
@@ -29,13 +29,12 @@ async def convert_to_jpeg(
     conv_create: ConversionCreate = Depends(ConversionCreate),
     image: UploadFile = File(),
     dispatcher: ActivemqDispatcher = Depends(activemq_dispatcher),
-    activemq_cache_manager: ActivemqCacheManager = Depends(activemq_cache_manager),
     message_factory: MessageFactory = Depends(MessageFactory),
+    activemq_cache_manager: ActivemqCacheManager = Depends(activemq_cache_manager),
     current_user: models.User = Depends(current_user),
     ):
     correlation_id = CorrelationIdGenerator.generate()
     # correlation_id = '1234' # integration local test
-    logging.info(f'Sending message to conversion service... target_format: {conv_create.target_format}')
     dispatcher.send_convert_image_message(
         message_factory.create_convert_image_message(
             file=image, 
@@ -43,10 +42,18 @@ async def convert_to_jpeg(
             correlation_id=correlation_id
             )
         )
-    convert_reply: ConvertImageReplyMsg = await activemq_cache_manager.await_reply_message(
-        correlation_id=correlation_id
-    )
-    logging.info(f'Received converted image. Sending store message...')
+    convert_reply = None
+    try: 
+        convert_reply: ConvertImageReplyMsg = await activemq_cache_manager.await_reply_message(
+            correlation_id=correlation_id
+        )
+    except HTTPException as e:
+        if e.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+            return Response(
+                content='Waiting for conversion message too long',
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+                )
+    logging.info(f'Received converted image: {convert_reply}. Sending store message...')
     
 
     correlation_id = CorrelationIdGenerator.generate()
@@ -60,9 +67,16 @@ async def convert_to_jpeg(
             correlation_id=correlation_id            
         )
     )
-    store_reply: StoreImageReplyMsg = await activemq_cache_manager.await_reply_message(
-        correlation_id=correlation_id
-    )
+    try:
+        store_reply: StoreImageReplyMsg = await activemq_cache_manager.await_reply_message(
+            correlation_id=correlation_id
+        )
+    except HTTPException as e:
+        if e.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+            return Response(
+                content='Waiting for conversion message too long',
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+                )
     logging.info(f'Received store image, link: {store_reply.url}. Sending notification..')
     
     

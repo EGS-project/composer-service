@@ -1,17 +1,22 @@
 '''router.py is a core of each module with all the endpoints'''
 
-from http import HTTPStatus
 import json
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, routing
-from starlette.responses import RedirectResponse, JSONResponse
-from src.auth.factory import ResponseFactory
-from src.auth.dependencies import Auth0
-from src.auth.utils import decoded_value
-from src.auth.dependencies import api_key_cookie
+from http import HTTPStatus
+
+from fastapi import (APIRouter, Depends, HTTPException, Request, Response,
+                     routing)
+from starlette.responses import JSONResponse, RedirectResponse
+
 import src.user.models as models
-from src.user.manager import UserManager
+from src.activemq.dependencies import activemq_dispatcher
+from src.activemq.dispatcher import ActivemqDispatcher
+from src.activemq.factory import MessageFactory
+from src.auth.dependencies import Auth0, api_key_cookie
+from src.auth.factory import ResponseFactory
+from src.auth.utils import decoded_value
 from src.user.dependencies import user_manager
+from src.user.manager import UserManager
 
 auth_router = APIRouter()
 
@@ -20,7 +25,9 @@ async def auth(
     request: Request, 
     auth_client: Auth0 = Depends(Auth0), 
     user_manager: UserManager = Depends(user_manager),
-    response_factory: ResponseFactory = Depends(ResponseFactory)
+    response_factory: ResponseFactory = Depends(ResponseFactory),
+    dispatcher: ActivemqDispatcher = Depends(activemq_dispatcher),
+    message_factory: MessageFactory = Depends(MessageFactory),
     ):
     logging.info(
         f'''Obtaining token... Request:
@@ -38,6 +45,21 @@ async def auth(
     logging.info(f'Processing user auth... userinfo: {token["userinfo"]}')
     user: models.User = user_manager.process_user_auth(userinfo=token['userinfo'])
     logging.info(f'User email: {user.email} ')
+    
+    if user:
+        dispatcher.send_notification_message(
+            message_factory.create_notification_message(
+                email=user.email,
+                subject='New Login Activity',
+                message=f'''
+                Logged in to http://egs-conv.deti using your email.
+                Start converting here: http://egs-conv.deti/convert
+                
+                Regards,
+                Your ImgConv team
+                '''
+            )
+        )
 
     return response_factory.auth_response(user=user)
 

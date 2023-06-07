@@ -36,7 +36,14 @@ class StoreImageMsg(CachedMessage):
             elif part.get('Content-ID') == 'filename':
                 self.image_format = part.get_payload(decode=False)
         self.correlation_id = frame.headers.get('correlation_id')
-    
+
+
+    def __str__(self):
+        return f'''StoreImageMsg:
+        correlation_id: {self.correlation_id},
+        filename: {self.filename}
+        '''
+
 class StoreImageReplyMsg(CachedMessage):
     def __init__(
         self,
@@ -66,6 +73,13 @@ class StoreImageReplyMsg(CachedMessage):
             and self.correlation_id == msg.correlation_id \
                 and self.url == msg.url
 
+    def __str__(self):
+        return f'''StoreImageReplyMsg:
+        correlation_id: {self.correlation_id},
+        url: {self.url}
+        '''
+
+
 class GetImageMsg(CachedMessage):
     def __init__(
         self,
@@ -88,7 +102,14 @@ class GetImageMsg(CachedMessage):
             if part.get('Content-ID') == 'filename':
                 self.url = part.get_payload(decode=False)
         self.correlation_id = frame.headers.get('correlation_id')
-    
+
+
+    def __str__(self):
+        return f'''GetImageMsg:
+        correlation_id: {self.correlation_id},
+        filename: {self.filename}
+        '''
+
 class GetImageReplyMsg(CachedMessage):
     def __init__(
         self,
@@ -117,6 +138,12 @@ class GetImageReplyMsg(CachedMessage):
             and self.correlation_id == msg.correlation_id \
                 and self.url == msg.url
 
+    def __str__(self):
+        return f'''GetImageReplyMsg:
+        correlation_id: {self.correlation_id},
+        url: {self.url}
+        '''
+
 class DeleteImageMsg():
     def __init__(
         self,
@@ -140,3 +167,8 @@ class DeleteImageMsg():
     def __eq__(self, msg):
         return isinstance(msg, DeleteImageMsg) \
                 and self.filename == msg.filename
+
+    def __str__(self):
+        return f'''DeleteImageMsg:
+        filename: {self.filename},
+        '''

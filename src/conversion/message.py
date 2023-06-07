@@ -37,6 +37,14 @@ class ConvertImageMsg(CachedMessage):
             elif part.get('Content-ID') == 'image_format':
                 self.image_format = part.get_payload(decode=True)
         self.correlation_id = frame.headers.get('correlation_id')
+        
+
+    def __str__(self):
+        return f'''ConvertImageMsg:
+        correlation_id: {self.correlation_id},
+        image_format: {self.image_format}
+        '''
+
 
 class ConvertImageReplyMsg(CachedMessage):
     def __init__(
@@ -65,3 +73,7 @@ class ConvertImageReplyMsg(CachedMessage):
         return isinstance(msg, ConvertImageReplyMsg) \
             and self.correlation_id == msg.correlation_id \
                 and self.image_data == msg.image_data
+
+    def __str__(self):
+        return f'''ConvertImageReplyMsg:
+        correlation_id: {self.correlation_id}'''
